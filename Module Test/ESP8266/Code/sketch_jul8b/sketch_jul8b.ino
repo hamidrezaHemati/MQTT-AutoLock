@@ -1,3 +1,5 @@
+// 🔴 Board Select: NodeMCU 1.0 (ESP-12E Module)
+
 #include <ESP8266WiFi.h>
 #include <Servo.h>
 #include <PubSubClient.h>
@@ -14,7 +16,7 @@ const char* ssid = "AvaPardaz";
 const char* password = "00148615501371";
 
 // === MQTT Settings ===
-const char* mqtt_server = "2.177.146.58";
+const char* mqtt_server = "2.177.238.83";
 const int mqtt_port = 1883;
 const char* mqtt_sub_topic = "test/truck/0/command/lock";
 const char* mqtt_pub_topic = "test/truck/0/data";
