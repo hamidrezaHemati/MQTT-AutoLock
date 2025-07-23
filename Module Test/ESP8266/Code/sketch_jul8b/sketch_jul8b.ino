@@ -15,11 +15,16 @@ const int mqtt_sub = 14;      // D5
 const char* ssid = "AvaPardaz";
 const char* password = "00148615501371";
 
+//const char* ssid = "Galaxy A30sD1CD";
+//const char* password = "dtjp9767";
+
 // === MQTT Settings ===
-const char* mqtt_server = "2.177.238.83";
+const char* mqtt_server = "91.185.132.147";
 const int mqtt_port = 1883;
-const char* mqtt_sub_topic = "test/truck/0/command/lock";
-const char* mqtt_pub_topic = "test/truck/0/data";
+int ID = 0; // or "1" for the second board
+String clientId = "ESP8266Client-" + String(ID); // ID should be 1 or 2
+String mqtt_sub_topic = "test/truck/" + String(ID) + "/command/lock";
+String mqtt_pub_topic = "test/truck/" + String(ID) + "/data";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -49,7 +54,13 @@ const int totalWaypoints = sizeof(gpsWaypoints) / sizeof(gpsWaypoints[0]);
 unsigned long lastPublishTime = 0;
 int currentWaypointIndex = 0;
 
-// === Wi-Fi ===
+// === Pin Assignments ===
+const int locked_greenLedPin = D8;  // Green LED for LOCK
+const int unlocked_redLedPin = D7;    // Red LED for UNLOCK
+
+// === Status Variables ===
+String lock_status = "unlock";  // Initial state
+
 
 String* scan_available_networks(int& count) {
   Serial.println("Scanning for available WiFi networks...");
@@ -153,10 +164,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // Optional: control servo with message
   if (message == "lock") {
     digitalWrite(mqtt_sub, HIGH);
+    lock_status = "lock";
     lock.write(0);
     delay(500);
   } else if (message == "unlock") {
     digitalWrite(mqtt_sub, HIGH);
+    lock_status = "unlock";
     lock.write(90);
     delay(500);
   }
@@ -170,9 +183,10 @@ void connect_to_MQTT() {
 
   while (!client.connected()) {
     Serial.print("Connecting to MQTT broker...");
-    if (client.connect("ESP8266Client")) {
+    if (client.connect(clientId.c_str())) {
       Serial.println("connected!");
-      client.subscribe(mqtt_sub_topic);
+//      client.subscribe(mqtt_sub_topic);
+      client.subscribe(mqtt_sub_topic.c_str());
       Serial.printf("Subscribed to: %s\n", mqtt_sub_topic);
     } else {
       Serial.print("failed, rc=");
@@ -192,6 +206,8 @@ void setup() {
   pinMode(wifi_disconnect, OUTPUT);
   pinMode(mqtt_pub, OUTPUT);
   pinMode(mqtt_sub, OUTPUT);
+  pinMode(locked_greenLedPin, OUTPUT);
+  pinMode(unlocked_redLedPin, OUTPUT);
 
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();  // Start fresh
@@ -222,7 +238,7 @@ void setup() {
     Serial.println("Please check the SSID or move closer to the access point.");
   }
   
-  lock.attach(5);  // attaches the servo on GIO5 to the servo object
+  lock.attach(5);  // attaches the servo on GIO5 D1 to the servo object
   lock.write(0);
   delay(1000); 
 
@@ -256,7 +272,7 @@ void loop() {
       char payload[128];
       serializeJson(doc, payload);
 
-      client.publish(mqtt_pub_topic, payload);
+      client.publish(mqtt_pub_topic.c_str(), payload);
 
       Serial.print("Published waypoint ");
       Serial.print(currentWaypointIndex + 1);
@@ -271,8 +287,14 @@ void loop() {
       lastPublishTime = millis();
     }
   }
+  
+  // Control LEDs based on lock_status
+  if (lock_status == "lock") {
+    digitalWrite(locked_greenLedPin, HIGH);  // Green ON
+    digitalWrite(unlocked_redLedPin, LOW);     // Red OFF
+  } else if (lock_status == "unlock") {
+    digitalWrite(locked_greenLedPin, LOW);   // Green OFF
+    digitalWrite(unlocked_redLedPin, HIGH);    // Red ON
+  }
+
 }
-
-
-
-
