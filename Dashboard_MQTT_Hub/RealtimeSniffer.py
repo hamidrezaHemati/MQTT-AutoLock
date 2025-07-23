@@ -41,6 +41,7 @@ def on_message(client, userdata, msg):
     # Extract truck id from topic: expected format "test/truck/<truck_id>/..."
     topic_parts = topic.split('/')
     module_ID = topic_parts[2] if len(topic_parts) > 2 else None
+    module_ID = str(module_ID)
     
     lat = lon = None
 
