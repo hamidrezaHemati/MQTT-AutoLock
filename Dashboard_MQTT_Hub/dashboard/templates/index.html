@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+
+  <!-- Leaflet CSS and JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="left-panel">
+        <h2>MQTT Settings</h2>
+
+        <form id="mqtt-form">
+            <div style="margin-bottom: 10px;">
+                <label for="mqtt-ip">MQTT address:</label>
+                <input type="text" id="mqtt-ip" placeholder="e.g. 192.168.1.1" name="mqtt-ip">
+                <label for="mqtt-port">Port:</label>
+                <input type="text" id="mqtt-port" placeholder="e.g. 1883" name="mqtt-port" style="width: 80px;">
+                <button type="submit" id="mqtt-port" name="mqtt-port" style="width: 80px; display: inline-block;">Connect</button>
+            </div>
+        </form>
+
+        <div id="connect-status"></div>
+
+        <script>
+            document.getElementById("mqtt-form").addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const address = document.getElementById("mqtt-address").value;
+                const port = document.getElementById("mqtt-port").value;
+
+                const response = await fetch("/connect_mqtt", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ address, port })
+                });
+
+                const result = await response.json();
+                document.getElementById("connect-status").innerText = result.message;
+            });
+        </script>
+
+        <!-- Connection Console -->
+        <!-- <div class="output" style="margin-top: 10px;">
+            <p><strong>Connection Console:</strong></p>
+            <div id="connectionConsole" style="height: 80px; overflow-y: auto; background-color: #fff; padding: 8px; border: 1px solid #ccc;"></div>
+        </div> -->
+
+        <hr>
+
+        <!-- MQTT Subscription -->
+        <h4>Subscribe to Topic</h4>
+        <form id="mqtt-form">
+            <div style="margin-bottom: 10px;">
+                <label for="subTopic">Topic to subscribe:</label>
+                <input type="text" id="subTopic" placeholder="e.g. test/topic" name="subTopic", style="width: 295px;">
+                <button type="submit" id="mqtt-port" name="mqtt-port" style="width: 80px;">Subscribe</button>
+            </div>
+        </form>
+
+        <!-- Message Log -->
+        <div class="output" style="margin-top: 10px;">
+            <p><strong>Latest Message:</strong></p>
+            <div id="msgLog" style="height: 100px; overflow-y: auto; background-color: #fff; padding: 8px; border: 1px solid #ccc;"></div>
+        </div>
+
+        <hr>
+
+        <!-- MQTT publishing -->
+        <h4>Publish to Topic</h4>
+        <form id="mqtt-form">
+            <div style="margin-bottom: 10px;">
+                <label for="pubTopic">Topic to publish on:</label>
+                <input type="text" id="pubTopic" placeholder="e.g. test/topic" name="pubTopic", style="width: 375px;">
+                <label for="pubTopic">Payload:</label>
+                <input type="text" id="pubTopic" placeholder="e.g. Hellow World!" name="pubTopic", style="width: 450px; padding-top: 10px;">
+                <button type="submit" id="mqtt-port" name="mqtt-port" style="width: 100%;">publish</button>
+            </div>
+        </form>
+
+
+        </div>
+
+
+    <div class="right-panel">
+      <div id="map"></div>
+    </div>
+  </div>
+
+<script>
+  const gpsData = {{ gps_data | tojson | safe }};
+  if (!Array.isArray(gpsData) || gpsData.length === 0) {
+    console.error("No GPS data available!");
+  }
+  let index = 0;
+
+  const map = L.map('map').setView(gpsData[0], 14);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+  }).addTo(map);
+
+  let marker = L.marker(gpsData[0]).addTo(map)
+               .bindPopup('Location 1')
+               .openPopup();
+
+  setInterval(() => {
+    index = (index + 1) % gpsData.length;
+
+    const newLatLng = gpsData[index];
+    marker.setLatLng(newLatLng);
+    marker.getPopup().setContent(`Location ${index + 1}`);
+    map.setView(newLatLng, 14);
+  }, 10000); // 10 seconds
+</script>
+

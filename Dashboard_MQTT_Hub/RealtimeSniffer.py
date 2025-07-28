@@ -9,7 +9,8 @@ import json
 BROKER = "89.219.240.178"  # broker IP address
 PORT = 1883                             
 
-SUB_TOPIC = "test/truck/+/data"
+# SUB_TOPIC = "test/truck/+/data"
+SUB_TOPIC = "test/module"
 PUB_TOPIC = "test/truck/0/command/lock"
 CLIENT_ID = "dashboard_mqtt_hub" 
 
