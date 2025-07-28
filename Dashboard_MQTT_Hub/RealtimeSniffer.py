@@ -6,7 +6,7 @@ import csv
 import json
 
 # === Configuration ===
-BROKER = "91.185.132.147"  # broker IP address
+BROKER = "89.219.240.178"  # broker IP address
 PORT = 1883                             
 
 SUB_TOPIC = "test/truck/+/data"

@@ -3,7 +3,7 @@ import folium
 import time
 import os
 
-MODULE_ID = "1"
+MODULE_ID = "0"
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 csv_path = os.path.join(script_dir, "mqtt_messages.csv")

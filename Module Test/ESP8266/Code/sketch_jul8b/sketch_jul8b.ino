@@ -19,7 +19,7 @@ const char* password = "00148615501371";
 //const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "91.185.132.147";
+const char* mqtt_server = "89.219.240.178";
 const int mqtt_port = 1883;
 int ID = 0; // or "1" for the second board
 String clientId = "ESP8266Client-" + String(ID); // ID should be 1 or 2
@@ -285,6 +285,9 @@ void loop() {
 
       currentWaypointIndex++;
       lastPublishTime = millis();
+      if (currentWaypointIndex >= totalWaypoints){
+        currentWaypointIndex = 0;
+      }
     }
   }
   
