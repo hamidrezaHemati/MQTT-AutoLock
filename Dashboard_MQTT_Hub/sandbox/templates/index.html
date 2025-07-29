@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MQTT Dashboard</title>
+  <meta charset="utf-8" />
+  <script>
+    async function fetchData() {
+      try {
+        const response = await fetch('/data');
+        const data = await response.json();
+        document.getElementById("timestamp").textContent = data.timestamp || "-";
+        document.getElementById("topic").textContent = data.topic || "-";
+        document.getElementById("payload").textContent = data.payload || "-";
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    }
+
+    setInterval(fetchData, 100); // Fetch every 2 seconds
+    window.onload = fetchData;
+  </script>
+</head>
+<body>
+  <h1>📡 MQTT Message Dashboard</h1>
+  <p><strong>Timestamp:</strong> <span id="timestamp">-</span></p>
+  <p><strong>Topic:</strong> <span id="topic">-</span></p>
+  <p><strong>Payload:</strong> <span id="payload">-</span></p>
+</body>
+</html>
