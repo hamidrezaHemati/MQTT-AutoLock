@@ -4,9 +4,11 @@ import time
 from flask import Flask, render_template, jsonify, make_response
 import paho.mqtt.client as mqtt
 from datetime import datetime
+from collections import deque
 
 app = Flask(__name__)
 latest_data = {"timestamp": None, "topic": None, "payload": None}
+message_history = deque(maxlen=10)
 
 BROKER = "89.219.240.178"
 PORT = 1883
@@ -24,13 +26,13 @@ def on_connect(client, userdata, flags, rc):
         print(f"❌ Failed to connect: {rc}")
 
 def on_message(client, userdata, msg):
-    global latest_data
-    latest_data = {
+    message_history.appendleft({
         "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "topic": msg.topic,
         "payload": msg.payload.decode()
-    }
-    print(f"📥 {latest_data['timestamp']} | {latest_data['topic']} | {latest_data['payload']}")
+    })
+    print(f"📥 {message_history[0]['timestamp']} | {message_history[0]['topic']} | {message_history[0]['payload']}")
+
 
 def mqtt_loop():
     try:
@@ -48,9 +50,10 @@ def index():
 
 @app.route('/data')
 def data():
-    response = make_response(jsonify(latest_data))
+    response = make_response(jsonify(list(message_history)))
     response.headers['Cache-Control'] = 'no-store'
     return response
+
 
 # === Main Entry Point ===
 if __name__ == "__main__":
