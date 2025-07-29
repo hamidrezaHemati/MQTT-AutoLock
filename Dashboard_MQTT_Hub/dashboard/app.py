@@ -36,8 +36,6 @@ def on_message(client, userdata, msg):
     payload_str = msg.payload.decode()
     lat = lon = None
 
-    print("debug payload:", payload_str, type(payload_str))
-
     try:
         payload_json = json.loads(payload_str)
         if isinstance(payload_json, dict):
@@ -57,7 +55,6 @@ def on_message(client, userdata, msg):
 
     message_history.appendleft(message)
 
-    # Debug print
     print(f"📥 {message['timestamp']} | {message['topic']} | {message['payload']} | {lat} | {lon}")
 
     
@@ -98,11 +95,14 @@ def start_mqtt(ip, port, topic):
     return connect_result["success"], connect_result["msg"]
 
 
-
 @app.route('/')
 def index():
-    gps_data = []  # or some dict/list with data you want to send
-    return render_template("index.html", gps_data=gps_data)
+    gps_point = None
+    if message_history:
+        current_msg = message_history[0]
+        if 'lat' in current_msg and 'lon' in current_msg:
+            gps_point = [current_msg['lat'], current_msg['lon']]
+    return render_template("index.html", gps_point=gps_point)
 
 
 @app.route('/data')

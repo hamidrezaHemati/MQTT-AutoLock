@@ -85,28 +85,54 @@
   </div>
 
 <script>
-  const gpsData = {{ gps_data | tojson | safe }};
-  if (!Array.isArray(gpsData) || gpsData.length === 0) {
-    console.error("No GPS data available!");
-  }
-  let index = 0;
+  // Initial gpsPoint from Flask rendering:
+  let gpsPoint = {{ gps_point | tojson | safe }};
 
-  const map = L.map('map').setView(gpsData[0], 14);
+  if (!gpsPoint) {
+    console.error("No GPS point available!");
+  }
+
+  const map = L.map('map').setView(gpsPoint || [0, 0], 14);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
   }).addTo(map);
 
-  let marker = L.marker(gpsData[0]).addTo(map)
-               .bindPopup('Location 1')
-               .openPopup();
+  let marker = null;
 
-  setInterval(() => {
-    index = (index + 1) % gpsData.length;
+  if (gpsPoint) {
+    marker = L.marker(gpsPoint).addTo(map)
+      .bindPopup('Most Recent Location')
+      .openPopup();
+  }
 
-    const newLatLng = gpsData[index];
-    marker.setLatLng(newLatLng);
-    marker.getPopup().setContent(`Location ${index + 1}`);
-    map.setView(newLatLng, 14);
-  }, 10000); // 10 seconds
+  async function fetchLatestLocation() {
+    try {
+      const response = await fetch('/data');
+      const messages = await response.json();
+
+      if (messages.length === 0) return;
+
+      const latest = messages[0];
+      if (latest.lat && latest.lon) {
+        const newPoint = [latest.lat, latest.lon];
+
+        if (marker) {
+          marker.setLatLng(newPoint);
+          marker.getPopup().setContent(`Most Recent Location:<br>${new Date(latest.timestamp).toLocaleString()}`);
+        } else {
+          marker = L.marker(newPoint).addTo(map)
+            .bindPopup('Most Recent Location')
+            .openPopup();
+        }
+        map.setView(newPoint, 14);
+      }
+    } catch (err) {
+      console.error("Error fetching latest location:", err);
+    }
+  }
+
+  // Update location every 2 seconds (adjust as needed)
+  setInterval(fetchLatestLocation, 1000);
 </script>
+
