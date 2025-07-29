@@ -55,20 +55,20 @@
 
     async function fetchData() {
       try {
-        const response = await fetch('/data');
-        const messages = await response.json();
+          const response = await fetch('/data');
+          const messages = await response.json();
 
-        const consoleDiv = document.getElementById("console");
-        consoleDiv.innerHTML = ""; // clear previous content
+          const consoleDiv = document.getElementById("console");
+          consoleDiv.innerHTML = ""; // clear previous content
 
-        messages.forEach(msg => {
-        const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload}`;
-        const p = document.createElement("div");
-        p.textContent = line;
-        consoleDiv.appendChild(p);
-        });
+          messages.forEach(msg => {
+          const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload} lat: ${msg.lat} lon: ${msg.lon}`;
+          const p = document.createElement("div");
+          p.textContent = line;
+          consoleDiv.appendChild(p);
+          });
       } catch (err) {
-        console.error("Error fetching data:", err);
+          console.error("Error fetching data:", err);
       }
     }
 

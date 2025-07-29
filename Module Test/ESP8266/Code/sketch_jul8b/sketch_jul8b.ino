@@ -23,8 +23,11 @@ const char* mqtt_server = "89.219.240.178";
 const int mqtt_port = 1883;
 int ID = 0; // or "1" for the second board
 String clientId = "ESP8266Client-" + String(ID); // ID should be 1 or 2
+//String mqtt_sub_topic = "test/truck/" + String(ID) + "/command/lock";
+//String mqtt_pub_topic = "test/truck/" + String(ID) + "/data";
+
 String mqtt_sub_topic = "test/truck/" + String(ID) + "/command/lock";
-String mqtt_pub_topic = "test/truck/" + String(ID) + "/data";
+String mqtt_pub_topic = "test/web";
 
 WiFiClient espClient;
 PubSubClient client(espClient);

@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 from flask import Flask, render_template, jsonify, make_response, request
@@ -31,39 +32,28 @@ def on_connect(c, userdata, flags, rc):
         connect_result["msg"] = f"Failed to connect, return code {rc}"
     connect_event.set()
 
-def on_message(c, userdata, msg):
+def on_message(client, userdata, msg):
+    payload_str = msg.payload.decode()
+    lat = lon = None
+
+    try:
+        payload_json = json.loads(payload_str)
+        lat = payload_json.get("lat")
+        lon = payload_json.get("lon")
+    except json.JSONDecodeError:
+        # Payload is not a JSON object, lat/lon remain None
+        pass
+
     message_history.appendleft({
         "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "topic": msg.topic,
-        "payload": msg.payload.decode()
+        "payload": payload_str,
+        "lat": lat,
+        "lon": lon
     })
-    print(f"📥 {message_history[0]['timestamp']} | {message_history[0]['topic']} | {message_history[0]['payload']}")
 
-
-# def start_mqtt(ip, port, topic):
-#     global client, current_config
-
-#     if client:
-#         try:
-#             client.loop_stop()
-#             client.disconnect()
-#         except Exception as e:
-#             print(f"❌ Error stopping old client: {e}")
-
-#     client = mqtt.Client(CLIENT_ID)
-#     client.on_connect = on_connect
-#     client.on_message = on_message
-
-#     current_config = {"ip": ip, "port": port, "topic": topic}
-
-#     try:
-#         client.connect(ip, int(port), 60)
-#         client.loop_start()
-#         print(f"🔄 Connecting to {ip}:{port} on topic '{topic}'")
-#         return True, f"Connected to {ip}:{port} on topic '{topic}'"
-#     except Exception as e:
-#         print(f"❌ MQTT connection error: {e}")
-#         return False, str(e)
+    # For debugging in terminal:
+    print(f"📥 {message_history[0]['timestamp']} | {message_history[0]['topic']} | {message_history[0]['payload']} | {lat} | {lon}")
     
 def start_mqtt(ip, port, topic):
     global client, current_config, connect_event, connect_result
@@ -127,8 +117,6 @@ def connect():
 
     success, msg = start_mqtt(ip, port, topic)
     status = "connected" if success else "error"
-    print("debug 1: ", status)
-    print("debug2 : ", msg)
     return jsonify({"status": status, "message": msg})
 
 
