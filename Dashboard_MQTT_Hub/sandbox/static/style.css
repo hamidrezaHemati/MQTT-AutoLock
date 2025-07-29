@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f9f9f9;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.form-row input {
+    padding: 8px;
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-row button {
+    padding: 8px 16px;
+}
+
+.status {
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.status.connected {
+    color: green;
+}
+
+.console-box {
+    background: #000;
+    color: #0f0;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+    font-family: monospace;
+    border-radius: 4px;
+}

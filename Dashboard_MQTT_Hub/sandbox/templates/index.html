@@ -1,39 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MQTT Dashboard</title>
-  <meta charset="utf-8" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <h2>MQTT Dashboard</h2>
+
+  <form id="mqtt-form">
+    <div class="form-row">
+      <input type="text" id="ip" placeholder="Broker IP" required>
+      <input type="number" id="port" placeholder="Port" required>
+      <input type="text" id="topic" placeholder="Topic" required>
+      <button type="submit">Connect</button>
+    </div>
+  </form>
+
+  <div id="status" class="status">🔌 Not Connected</div>
+
+  <h3>Console (Last 5 Messages)</h3>
+  <div id="console" style="font-family: monospace; background: #ebe6e6; color: rgb(4, 116, 4); padding: 1em; height: 150px; overflow-y: auto;">
+    Loading...
+  </div>
+
   <script>
+    const consoleBox = document.getElementById("console");
+    const statusBox = document.getElementById("status");
+    let messages = [];
+
+    document.getElementById("mqtt-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const ip = document.getElementById("ip").value;
+      const port = document.getElementById("port").value;
+      const topic = document.getElementById("topic").value;
+
+      const response = await fetch('/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip, port, topic })
+      });
+
+      const result = await response.json();
+      if (result.status === "connected") {
+        statusBox.textContent = "✅ Connected to MQTT Broker!";
+        statusBox.classList.add("connected");
+      } else {
+        statusBox.textContent = "❌ Connection Failed";
+        statusBox.classList.remove("connected");
+      }
+    });
+
     async function fetchData() {
-        try {
-            const response = await fetch('/data');
-            const messages = await response.json();
+      try {
+        const response = await fetch('/data');
+        const messages = await response.json();
 
-            const consoleDiv = document.getElementById("console");
-            consoleDiv.innerHTML = ""; // clear previous content
+        const consoleDiv = document.getElementById("console");
+        consoleDiv.innerHTML = ""; // clear previous content
 
-            messages.forEach(msg => {
-            const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload}`;
-            const p = document.createElement("div");
-            p.textContent = line;
-            consoleDiv.appendChild(p);
-            });
-        } catch (err) {
-            console.error("Error fetching data:", err);
-        }
+        messages.forEach(msg => {
+        const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload}`;
+        const p = document.createElement("div");
+        p.textContent = line;
+        consoleDiv.appendChild(p);
+        });
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
     }
 
     setInterval(fetchData, 100); // Fetch every 2 seconds
     window.onload = fetchData;
   </script>
-</head>
-<body>
-    <h1>📡 MQTT Message Dashboard</h1>
-    <p><strong>Timestamp:</strong> <span id="timestamp">-</span></p>
-    <p><strong>Topic:</strong> <span id="topic">-</span></p>
-    <div id="console" style="font-family: monospace; background: #111; color: #0f0; padding: 1em; height: 150px; overflow-y: auto;">
-    Loading...
-    </div>
-  <!-- <p><strong>Payload:</strong> <span id="payload">-</span></p> -->
 </body>
 </html>
