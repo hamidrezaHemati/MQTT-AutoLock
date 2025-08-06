@@ -97,11 +97,11 @@ def start_mqtt(ip, port, topic):
 
 @app.route('/')
 def index():
-    gps_point = None
-    if message_history:
-        current_msg = message_history[0]
-        if 'lat' in current_msg and 'lon' in current_msg:
-            gps_point = [current_msg['lat'], current_msg['lon']]
+    gps_point = [35.776215087404076, 51.47687022102022]
+    # if message_history:
+    #     current_msg = message_history[0]
+    #     if 'lat' in current_msg and 'lon' in current_msg:
+    #         gps_point = [current_msg['lat'], current_msg['lon']]
     return render_template("index.html", gps_point=gps_point)
 
 
