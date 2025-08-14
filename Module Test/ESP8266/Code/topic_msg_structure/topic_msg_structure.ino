@@ -14,14 +14,14 @@ const int mqtt_pub = 2;       // D4
 const int mqtt_sub = 14;      // D5
 
 // === Wi-Fi Credentials ===
-const char* ssid = "AvaPardaz";
-const char* password = "00148615501371";
+//const char* ssid = "AvaPardaz";
+//const char* password = "00148615501371";
 
-//const char* ssid = "Galaxy A30sD1CD";
-//const char* password = "dtjp9767";
+const char* ssid = "Galaxy A30sD1CD";
+const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "2.177.146.74";
+const char* mqtt_server = "89.219.105.47";
 const int mqtt_port = 1883;
 
 

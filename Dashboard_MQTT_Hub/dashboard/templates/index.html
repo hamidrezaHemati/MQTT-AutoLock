@@ -65,7 +65,7 @@
 
               messages.forEach(msg => {
               // const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload} lat: ${msg.lat} lon: ${msg.lon}`;
-              const line = `[${msg.timestamp}] ${msg.topic} → ${msg.payload}`;
+              const line = `[${msg.timestamp}] ${msg.topic} → ${msg.HH}:${msg.MM}:${msg.SS}, ${msg.lat}, ${msg.lon}, ${msg.Alt}, ${msg.Batt}, ${msg["Lock Status"]}, ${msg.Temprature}, ${msg.RSSI}, ${msg.Cnt}, ${msg.isQueued}`;
               const p = document.createElement("div");
               p.textContent = line;
               consoleDiv.appendChild(p);
