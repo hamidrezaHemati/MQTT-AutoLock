@@ -11,6 +11,9 @@ import json
 
 app = Flask(__name__, static_folder='static')
 
+mqtt_server_ip = '89.219.105.47'
+mqtt_server_port = 1883
+
 # Get absolute path to the folder this script is in
 script_dir = os.path.dirname(os.path.abspath(__file__))
 csv_path = os.path.join(script_dir, "mqtt_messages.csv")
@@ -159,14 +162,13 @@ def data():
 @app.route('/connect', methods=['POST'])
 def connect():
     data = request.get_json()
-    ip = data.get("ip")
-    port = data.get("port")
-    topic = data.get("topic")
+    IMEA = data.get("IMEA")
 
-    if not (ip and port and topic):
-        return jsonify({"status": "error", "message": "IP, port, and topic are required"}), 400
-
-    success, msg = start_mqtt(ip, port, topic)
+    if not (IMEA):
+        return jsonify({"status": "error", "message": "Your device IMEA code is required"}), 400
+    
+    topic = f'truck/{IMEA}/status'
+    success, msg = start_mqtt(mqtt_server_ip, mqtt_server_port, topic)
     status = "connected" if success else "error"
     return jsonify({"status": status, "message": msg})
 
