@@ -1,17 +1,18 @@
 // 🔴 Board Select: NodeMCU 1.0 (ESP-12E Module)
 
-#include <ESP8266WiFi.h>
-#include <Servo.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-#include <Wire.h>
-#include "RTClib.h"
+#include <WiFiUdp.h>
+
 
 // === GPIO Pins ===
-const int wifi_connect = 4;   // D2
-const int wifi_disconnect = 12; // D6
-const int mqtt_pub = 2;       // D4
-const int mqtt_sub = 14;      // D5
+const int wifi_connect = 15;   // D15
+const int wifi_disconnect = 2; // D2
+const int mqtt_pub = 4;       // D4
+const int mqtt_sub = 5;      // D5
+
+//IMEI: 866104021507291
 
 // === Wi-Fi Credentials ===
 const char* ssid = "AvaPardaz";
@@ -21,22 +22,21 @@ const char* password = "00148615501371";
 //const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "89.219.240.178";
+const char* mqtt_server = "89.219.208.162";
 const int mqtt_port = 1883;
 
 
-const String IMEA = "0000"; // or "0001" for the second board
-String clientId = "ESP8266Client-" + IMEA; // ID should be 1 or 2
+const String IMEI = "0001"; // or "0001" for the second board
+String clientId = "ESP8266Client-" + IMEI; // ID should be 1 or 2
 
-String status_topic_pub = "truck/" + IMEA + "/status";
-String rfid_topic_pub = "truck/" + IMEA + "/rfid";
+String status_topic_pub = "truck/" + IMEI + "/status";
+String rfid_topic_pub = "truck/" + IMEI + "/rfid";
 
-String command_lock_sub = "truck/" + IMEA + "/command/lock";
-String command_config_sub = "truck/" + IMEA + "/command/config";
+String command_lock_sub = "truck/" + IMEI + "/command/lock";
+String command_config_sub = "truck/" + IMEI + "/command/config";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-Servo lock;
 
 // === GPS Waypoints ===
 struct Waypoint {
@@ -64,15 +64,11 @@ int currentWaypointIndex = 0;
 int msg_counter = 0;
 
 // === Pin Assignments ===
-const int locked_greenLedPin = D8;  // Green LED for LOCK
-const int unlocked_redLedPin = D7;    // Red LED for UNLOCK
+const int locked_greenLedPin = 18;  // Green LED for LOCK D18
+const int unlocked_redLedPin = 19;    // Red LED for UNLOCK D19
 
 // === Status Variables ===
 String lock_status = "unlock";  // Initial state
-
-// === RTC fro time ===
-RTC_DS3231 rtc;
-
 
 String* scan_available_networks(int& count) {
   Serial.println("Scanning for available WiFi networks...");
@@ -97,7 +93,7 @@ String* scan_available_networks(int& count) {
     Serial.print(WiFi.RSSI(i));
     Serial.print(") MAC:");
     Serial.print(WiFi.BSSIDstr(i));
-    Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " Unsecured" : " Secured");
+    Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " Unsecured" : " Secured");
     delay(10);
   }
 
@@ -177,12 +173,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (message == "lock") {
     digitalWrite(mqtt_sub, HIGH);
     lock_status = "lock";
-    lock.write(0);
     delay(500);
   } else if (message == "unlock") {
     digitalWrite(mqtt_sub, HIGH);
     lock_status = "unlock";
-    lock.write(90);
     delay(500);
   }
   digitalWrite(mqtt_sub, LOW);
@@ -211,27 +205,28 @@ void connect_to_MQTT() {
 }
 
 String get_time() {
-  DateTime now = rtc.now();
-  char buf[9]; // hh:mm:ss
-  sprintf(buf, "%02d,%02d,%02d", now.hour(), now.minute(), now.second());
-  String current_time(buf);
-  Serial.println("Time: " + current_time);
-  return current_time;
+//  DateTime now = rtc.now();
+//  char buf[9]; // hh:mm:ss
+//  sprintf(buf, "%02d,%02d,%02d", now.hour(), now.minute(), now.second());
+//  String current_time(buf);
+//  Serial.println("Time: " + current_time);
+//  return current_time;
+    return "13,05,20";
 }
 
 
-String create_status_msg(String lat, String lon, String alt, String lock_status int counter) {
+String create_status_msg(String lat, String lon, String alt, String _lock_status, int counter){
   String current_time = get_time();
   String battery_level = "7";
   String temperature = "32";
   String _RSSI = "31";
   String is_Queued = "0";
-  String lock_state = "U"
-  if lock_status == "unlock"{
-    lock_state = "U"
+  String lock_state = "U";
+  if (_lock_status == "unlock"){
+    lock_state = "U";
   }
   else{
-    lock_state = "L"
+    lock_state = "L";
   }
 
   return "{" + current_time + "," + lat + "," + lon + "," + alt + "," + battery_level + "," +
@@ -288,13 +283,6 @@ void setup() {
     Serial.println("Please check the SSID or move closer to the access point.");
   }
 
-  if (!rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-  
-  lock.attach(5);  // attaches the servo on GIO5 D1 to the servo object
-  lock.write(0);
   delay(1000); 
 }
 
@@ -319,14 +307,14 @@ void loop() {
   if (millis() - lastPublishTime >= 10000 && client.connected()) {
     if (currentWaypointIndex < totalWaypoints) {
       StaticJsonDocument<128> doc;
-      lat = gpsWaypoints[currentWaypointIndex].lat;
-      lon = gpsWaypoints[currentWaypointIndex].lon;
-      alt = "20.5";
+      String lat = String(gpsWaypoints[currentWaypointIndex].lat, 10);
+      String lon = String(gpsWaypoints[currentWaypointIndex].lon, 10);
+      String alt = "20.5";
 
       String payloadStr = create_status_msg(lat, lon, alt, lock_status, msg_counter);
       char payload[128];
       payloadStr.toCharArray(payload, sizeof(payload));
-      client.publish(mqtt_pub_topic.c_str(), payload);
+      client.publish(status_topic_pub.c_str(), payload);
 
       Serial.print("Published Status ");
       Serial.print(msg_counter + 1);

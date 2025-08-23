@@ -13,6 +13,8 @@ const int wifi_disconnect = 12; // D6
 const int mqtt_pub = 2;       // D4
 const int mqtt_sub = 14;      // D5
 
+//IMEI: 866104021507291
+
 // === Wi-Fi Credentials ===
 //const char* ssid = "AvaPardaz";
 //const char* password = "00148615501371";
@@ -21,18 +23,18 @@ const char* ssid = "Galaxy A30sD1CD";
 const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "89.219.105.47";
+const char* mqtt_server = "89.219.227.12";
 const int mqtt_port = 1883;
 
 
-const String IMEA = "0000"; // or "0001" for the second board
-String clientId = "ESP8266Client-" + IMEA; // ID should be 1 or 2
+const String IMEI = "0001"; // or "0001" for the second board
+String clientId = "ESP8266Client-" + IMEI; // ID should be 1 or 2
 
-String status_topic_pub = "truck/" + IMEA + "/status";
-String rfid_topic_pub = "truck/" + IMEA + "/rfid";
+String status_topic_pub = "truck/" + IMEI + "/status";
+String rfid_topic_pub = "truck/" + IMEI + "/rfid";
 
-String command_lock_sub = "truck/" + IMEA + "/command/lock";
-String command_config_sub = "truck/" + IMEA + "/command/config";
+String command_lock_sub = "truck/" + IMEI + "/command/lock";
+String command_config_sub = "truck/" + IMEI + "/command/config";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
