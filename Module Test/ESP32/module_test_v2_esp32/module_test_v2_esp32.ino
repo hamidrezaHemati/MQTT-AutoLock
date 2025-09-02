@@ -13,6 +13,7 @@ const int mqtt_pub = 4;       // D4
 const int mqtt_sub = 5;      // D5
 
 //IMEI: 866104021507291
+//IMEI: 869531071801256
 
 // === Wi-Fi Credentials ===
 const char* ssid = "AvaPardaz";
@@ -22,7 +23,9 @@ const char* password = "00148615501371";
 //const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "89.219.208.162";
+//const char* mqtt_server = "89.219.208.162";
+const char* mqtt_server = "185.215.244.182";
+
 const int mqtt_port = 1883;
 
 
