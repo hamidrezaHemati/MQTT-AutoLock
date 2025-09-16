@@ -16,16 +16,17 @@ const int mqtt_sub = 14;      // D5
 //IMEI: 866104021507291
 
 // === Wi-Fi Credentials ===
-//const char* ssid = "AvaPardaz";
-//const char* password = "00148615501371";
+const char* ssid = "AvaPardaz";
+const char* password = "00148615501371";
 
-const char* ssid = "Galaxy A30sD1CD";
-const char* password = "dtjp9767";
+//const char* ssid = "Galaxy A30sD1CD";
+//const char* password = "dtjp9767";
 
 // === MQTT Settings ===
-const char* mqtt_server = "89.219.227.12";
+const char* mqtt_server = "46.62.161.208";
 const int mqtt_port = 1883;
-
+unsigned long publishInterval = 10000; // 10 seconds
+unsigned long KEEPALIVE_TIME = 120;
 
 const String IMEI = "0001"; // or "0001" for the second board
 String clientId = "ESP8266Client-" + IMEI; // ID should be 1 or 2
@@ -190,11 +191,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void connect_to_MQTT() {
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
+  client.setKeepAlive(KEEPALIVE_TIME);  // 🔴 
 
   while (!client.connected()) {
     Serial.print("Connecting to MQTT broker...");
     if (client.connect(clientId.c_str())) {
       Serial.println("connected!");
+      Serial.println(client.connect(clientId.c_str()));
+      Serial.println(clientId.c_str());
       client.subscribe(command_lock_sub.c_str());
       client.subscribe(command_config_sub.c_str());
       Serial.printf("Subscribed to: %s\n", command_lock_sub);
@@ -308,9 +312,9 @@ void loop() {
   }
 
   client.loop();
-  
+
   // Publish GPS data every 10 seconds
-  if (millis() - lastPublishTime >= 10000 && client.connected()) {
+  if (millis() - lastPublishTime >= publishInterval && client.connected()) {
     if (currentWaypointIndex < totalWaypoints) {
       StaticJsonDocument<128> doc;
       String lat = String(gpsWaypoints[currentWaypointIndex].lat, 10);
