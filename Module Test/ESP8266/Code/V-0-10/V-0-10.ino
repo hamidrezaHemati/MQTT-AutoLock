@@ -240,10 +240,11 @@ String create_status_msg(String lat, String lon,  String _lock_status, int count
   String _RSSI = "31";
   String is_Queued = "0";
   String lock_state = "U";
-  String traveledDist = String(random(1000, 10000)) + "." + String(random(0, 10));
-  String totalTraveledDist = String(random(5000, 15000)) + "." + String(random(0, 10));
+  int traveledDist_numberic = random(100, 1000);
+  String traveledDist = String(traveledDist_numberic) + "." + String(random(0, 10));
+  String totalTraveledDist = String(traveledDist_numberic + 50) + "." + String(random(0, 10));
 
-  String _speed = String(random(5, 50)) + "." + String(random(0, 100));
+  String _speed = String(random(0, 160)) + "." + String(random(0, 10));
   String isInGeo = "N";
   String distanceToGeo = String(random(1000, 100000));
   
