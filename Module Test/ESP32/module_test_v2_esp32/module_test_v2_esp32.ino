@@ -16,21 +16,22 @@ const int mqtt_sub = 5;      // D5
 //IMEI: 869531071801256
 
 // === Wi-Fi Credentials ===
-const char* ssid = "AvaPardaz";
-const char* password = "00148615501371";
+//const char* ssid = "AvaPardaz";
+//const char* password = "00148615501371";
 
-//const char* ssid = "Galaxy A30sD1CD";
-//const char* password = "dtjp9767";
+const char* ssid = "Galaxy A30sD1CD";
+const char* password = "dtjp9767";
 
 // === MQTT Settings ===
 //const char* mqtt_server = "89.219.208.162";
-const char* mqtt_server = "185.215.244.182";
+//const char* mqtt_server = "185.215.244.182";
+const char* mqtt_server = "46.62.161.208";
 
 const int mqtt_port = 1883;
 
 
-const String IMEI = "0001"; // or "0001" for the second board
-String clientId = "ESP8266Client-" + IMEI; // ID should be 1 or 2
+const String IMEI = "00000001"; // or "0001" for the second board
+String clientId = "CLID_" + String(IMEI); // ID should be 1 or 2
 
 String status_topic_pub = "truck/" + IMEI + "/status";
 String rfid_topic_pub = "truck/" + IMEI + "/rfid";
@@ -219,12 +220,27 @@ String get_time() {
 
 
 String create_status_msg(String lat, String lon, String alt, String _lock_status, int counter){
+  
   String current_time = get_time();
+  int gpsSourceProfile = random(10);
+  String gpsSource = "G";
+  if (gpsSourceProfile <= 2){
+    gpsSource = "B";
+  }
   String battery_level = "7";
   String temperature = "32";
   String _RSSI = "31";
   String is_Queued = "0";
   String lock_state = "U";
+  int traveledDist_numberic = random(100, 1000);
+  String traveledDist = String(traveledDist_numberic) + "." + String(random(0, 10));
+  String totalTraveledDist = String(traveledDist_numberic + 50) + "." + String(random(0, 10));
+
+  String _speed = String(random(0, 160)) + "." + String(random(0, 10));
+  String isInGeo = "N";
+  String distanceToGeo = String(random(1000, 100000));
+  
+  
   if (_lock_status == "unlock"){
     lock_state = "U";
   }
@@ -232,17 +248,15 @@ String create_status_msg(String lat, String lon, String alt, String _lock_status
     lock_state = "L";
   }
 
-  return "{" + current_time + "," + lat + "," + lon + "," + alt + "," + battery_level + "," +
-         lock_state + "," + temperature + "," + _RSSI + "," + String(counter) + "," + is_Queued + "}";
+  return "{" + current_time + "," + lat + "," + lon + "," + gpsSource + "," + traveledDist + "," + totalTraveledDist + "," + _speed + "," +
+           battery_level + "," + lock_state + "," + temperature + "," + _RSSI + "," + String(counter) + "," + is_Queued + "," + isInGeo + "," + distanceToGeo + "}";
 }
 
 String create_rfid_msg(String lat, String lon, String alt, int counter) {
-  String current_time = get_time();
   String rfid_serial = "100100100200";
   String action_Request = "U";
 
-  return "{" + current_time + "," + lat + "," + lon + "," + alt + "," +
-         rfid_serial + "," + action_Request + "}";
+  return "{" +rfid_serial + "," + action_Request + "}";
 }
 
 
