@@ -16,11 +16,11 @@ const int mqtt_sub = 14;      // D5
 //IMEI: 866104021507291
 
 // === Wi-Fi Credentials ===
-const char* ssid = "AvaPardaz";
-const char* password = "00148615501371";
+//const char* ssid = "AvaPardaz";
+//const char* password = "00148615501371";
 
-//const char* ssid = "Galaxy A30sD1CD";
-//const char* password = "dtjp9767";
+const char* ssid = "Galaxy A30sD1CD";
+const char* password = "dtjp9767";
 
 // === MQTT Settings ===
 const char* mqtt_server = "46.62.161.208";
@@ -28,7 +28,7 @@ const int mqtt_port = 1883;
 unsigned long publishInterval = 10000; // 10 seconds
 unsigned long KEEPALIVE_TIME = 120;
 
-const String IMEI = "0001"; // or "0001" for the second board
+const String IMEI = "00000002"; // or "0001" for the second board
 String clientId = "ESP8266Client-" + IMEI; // ID should be 1 or 2
 
 String status_topic_pub = "truck/" + IMEI + "/status";
